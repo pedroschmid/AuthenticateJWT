@@ -1,35 +1,40 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import mongoose from "mongoose";
 
-import { UserRoute } from "./routes/UserRoute";
+import UserRoute from "./routes/UserRoute.js";
 
 class App {
-  PORT = process.env.PORT || 8080;
-  userRoute = new UserRoute();
-
+  userRoute = new UserRoute()
   constructor() {
     this.app = express();
     this.middlewares();
+    this.database();
     this.routes();
-    this.server();
   }
 
   middlewares() {
     this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: true }));
+    this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(cors());
   }
 
-  routes() {
-    this.userRoute.routes(this.app);
+  database() {
+    mongoose.Promise = global.Promise;
+    mongoose.connect(
+      "mongodb+srv://root:root@powertrip-zp9uk.mongodb.net/imgone?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false
+      }
+    );
   }
 
-  server() {
-    this.app.listen(this.PORT, () => {
-      console.log(`Server running on 127.0.0.1:${this.PORT}/`);
-    });
+  routes() {
+    this.userRoute.routes(this.app)
   }
 }
 
-new App();
+export default new App().app;

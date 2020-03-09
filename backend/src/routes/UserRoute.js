@@ -1,19 +1,19 @@
-import { UserController } from "../controllers/UserController";
+import UserController from "../controllers/UserController.js";
 
-export class UserRoute {
+export default class UserRoute {
   userController = new UserController();
 
   routes(app) {
     app
       .route("/user")
-      .get(this.userController.selectAll)
-      .post(this.userController.insert)
-      .delete(this.userController.deleteAll);
+      .get(this.userController.read)
+      .post(this.userController.create);
 
     app
-      .route("/user/:id")
-      .get(this.userController.selectById)
-      .put(this.userController.updateById)
-      .delete(this.userController.deleteById);
+      .route("/user/:name")
+      .put(this.userController.update)
+      .delete(this.userController.delete);
+
+    app.route("/user/authenticate").get(this.userController.authenticate);
   }
 }

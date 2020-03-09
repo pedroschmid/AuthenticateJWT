@@ -1,62 +1,110 @@
-import { pool } from "../databases/postgres";
+import UserModel from "../models/UserModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-export class UserController {
-  async selectAll(request, response) {
-    let SQL = "SELECT * FROM users";
+export default class UserController {
+  async create(request, response) {
+    let newUser = new UserModel(request.body);
 
-    await pool.query(SQL, (error, data) => {
-      error ? error : response.json(data.rows);
+    await newUser.save((error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        response.json({
+          status: "SUCCESS",
+          message: "USER ADDED SUCCESSFULLY",
+          data: result
+        });
+      }
     });
   }
 
-  async deleteAll(request, response) {
-    let SQL = "TRUNCATE users";
-
-    pool.query(SQL, (error, data) => {
-      error ? error : response.json(data.rows);
+  async read(request, response) {
+    await UserModel.find({}, (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        response.json({
+          status: "SUCCESS",
+          message: "LISTING USERS",
+          data: result
+        });
+      }
     });
   }
 
-  async selectById(request, response) {
-    let { id } = request.params;
+  async update(request, response) {
+    let filter = {
+      name: request.params.name
+    };
+    let data = request.body;
 
-    let SQL = "SELECT * FROM users where id = $1 RETURNING *";
+    await UserModel.findOneAndUpdate(
+      filter,
+      data,
+      {
+        new: true
+      },
+      (error, result) => {
+        if (error) {
+          throw error;
+        } else {
+          response.json({
+            status: "SUCCESS",
+            message: "USER UPDATED SUCCESSFULLY",
+            data: result
+          });
+        }
+      }
+    );
+  }
 
-    await pool.query(SQL, [id], (error, data) => {
-      error ? error : response.json(data.rows);
+  async delete(request, response) {
+    let filter = { name: request.params.name };
+
+    await UserModel.findOneAndDelete(filter, (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        response.json({
+          status: "SUCCESS",
+          message: "USER DELETED SUCCESSFULLY",
+          data: result
+        });
+      }
     });
   }
 
-  async insert(request, response) {
-    let { username, password } = request.body;
+  async authenticate(request, response) {
+    let { email, password } = request.body;
 
-    let SQL =
-      "INSERT INTO users(username, password) VALUES($1, $2) RETURNING *";
+    UserModel.findOne({ email: email }, (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        if (bcrypt.compareSync(password, result.password)) {
+          let token = jwt.sign(
+            { id: result._id },
+            request.app.get("secretKey"),
+            { expiresIn: "1h" }
+          );
 
-    await pool.query(SQL, [username, password], (error, data) => {
-      error ? error : response.json(data.rows);
-    });
-  }
-
-  async updateById(request, response) {
-    let { id } = request.params;
-    let { username, password } = request.body;
-
-    let SQL =
-      "UPDATE users SET username = $1, password = $2 WHERE id = $3 RETURNING *";
-
-    await pool.query(SQL, [username, password, id], (error, data) => {
-      error ? error : response.json(data.rows);
-    });
-  }
-
-  async deleteById(request, response) {
-    let { id } = request.params;
-
-    let SQL = "DELETE FROM users WHERE id = $1 RETURNING *";
-
-    await pool.query(SQL, [id], (error, data) => {
-      error ? error : response.json(data.rows);
+          response.json({
+            status: "success",
+            message: "user found!",
+            data: {
+              user: result,
+              token: token
+            }
+          });
+        } else {
+          response.json({
+            status: "error",
+            message: "invalid email/password!",
+            data: null
+          });
+        }
+      }
     });
   }
 }
