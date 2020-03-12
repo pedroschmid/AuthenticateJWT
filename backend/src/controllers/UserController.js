@@ -3,6 +3,22 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export default class UserController {
+  // Get all users
+  async getAll(request, response) {
+    await UserModel.find({}, (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        response.json({
+          status: "SUCCESS",
+          message: "LISTING USERS",
+          data: result
+        });
+      }
+    });
+  }
+
+  // Create user
   async create(request, response) {
     let newUser = new UserModel(request.body);
 
@@ -19,23 +35,10 @@ export default class UserController {
     });
   }
 
-  async read(request, response) {
-    await UserModel.find({}, (error, result) => {
-      if (error) {
-        throw error;
-      } else {
-        response.json({
-          status: "SUCCESS",
-          message: "LISTING USERS",
-          data: result
-        });
-      }
-    });
-  }
-
-  async update(request, response) {
+  // Update user by name
+  async updateByName(request, response) {
     let filter = {
-      name: request.params.name
+      name: request.params.userName
     };
     let data = request.body;
 
@@ -59,8 +62,9 @@ export default class UserController {
     );
   }
 
-  async delete(request, response) {
-    let filter = { name: request.params.name };
+  // Delet user by name
+  async deleteByName(request, response) {
+    let filter = { name: request.params.userName };
 
     await UserModel.findOneAndDelete(filter, (error, result) => {
       if (error) {
@@ -75,6 +79,7 @@ export default class UserController {
     });
   }
 
+  // Authenticate user and generate a jwt token
   async authenticate(request, response) {
     let { email, password } = request.body;
 
