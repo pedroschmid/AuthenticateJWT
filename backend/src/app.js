@@ -9,7 +9,6 @@ import UserRoute from "./routes/UserRoute.js";
 import MovieRoute from "./routes/MovieRoute.js";
 
 class App {
-
   constructor() {
     this.app = express();
     this.middlewares();
@@ -44,17 +43,20 @@ class App {
   }
 
   // Function to validate user
-  validateUser(req, res, next) {
+  validateUser(request, response) {
     jwt.verify(
-      req.headers["x-access-token"],
-      req.app.get("secretKey"),
-      function(err, decoded) {
-        if (err) {
-          res.json({ status: "error", message: err.message, data: null });
+      request.headers["x-access-token"],
+      request.app.get("secretKey"),
+      function(error, decoded) {
+        if (error) {
+          response.json({
+            status: "error",
+            message: error.message,
+            data: null
+          });
         } else {
           // add user id to request
-          req.body.userName = decoded.id;
-          next();
+          request.body.userId = decoded.id;
         }
       }
     );
