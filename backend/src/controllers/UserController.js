@@ -1,6 +1,7 @@
 import UserModel from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import MovieModel from "../models/MovieModel.js";
 
 export default class UserController {
   // Get all users
@@ -12,6 +13,20 @@ export default class UserController {
         response.json({
           status: "SUCCESS",
           message: "LISTING USERS",
+          data: result
+        });
+      }
+    });
+  }
+
+  async getById(request, response) {
+    await MovieModel.findById(request.params.movieId, (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        response.json({
+          status: "SUCCESS",
+          message: "USER FOUND SUCCESSFULLY",
           data: result
         });
       }
@@ -36,14 +51,11 @@ export default class UserController {
   }
 
   // Update user by name
-  async updateByName(request, response) {
-    let filter = {
-      name: request.params.userName
-    };
+  async updateById(request, response) {
     let data = request.body;
 
-    await UserModel.findOneAndUpdate(
-      filter,
+    await UserModel.findByIdAndUpdate(
+      request.params.userId,
       data,
       {
         new: true
@@ -63,20 +75,21 @@ export default class UserController {
   }
 
   // Delet user by name
-  async deleteByName(request, response) {
-    let filter = { name: request.params.userName };
-
-    await UserModel.findOneAndDelete(filter, (error, result) => {
-      if (error) {
-        throw error;
-      } else {
-        response.json({
-          status: "SUCCESS",
-          message: "USER DELETED SUCCESSFULLY",
-          data: result
-        });
+  async deleteById(request, response) {
+    await UserModel.findByIdAndDelete(
+      request.params.movieId,
+      (error, result) => {
+        if (error) {
+          throw error;
+        } else {
+          response.json({
+            status: "SUCCESS",
+            message: "USER DELETED SUCCESSFULLY",
+            data: result
+          });
+        }
       }
-    });
+    );
   }
 
   // Authenticate user and generate a jwt token

@@ -16,15 +16,13 @@ export default class MovieController {
   }
 
   async getByName(request, response) {
-    let filter = { name: request.params.movieName };
-
-    await MovieModel.findOne(filter, (error, result) => {
+    await MovieModel.findById(request.params.movieId, (error, result) => {
       if (error) {
         throw error;
       } else {
         response.json({
           status: "SUCCESS",
-          message: "USER FOUND SUCCESSFULLY",
+          message: "MOVIE FOUND SUCCESSFULLY",
           data: result
         });
       }
@@ -48,11 +46,10 @@ export default class MovieController {
   }
 
   async updateByName(request, response) {
-    let filter = { name: request.params.movieName };
     let data = request.body;
 
-    await MovieModel.findOneAndUpdate(
-      filter,
+    await MovieModel.findByIdAndUpdate(
+      request.params.movieId,
       data,
       { new: true },
       (error, result) => {
@@ -70,18 +67,19 @@ export default class MovieController {
   }
 
   async deleteByName(request, response) {
-    let filter = { name: request.body.movieName };
-
-    await MovieModel.findOneAndDelete(filter, (error, result) => {
-      if (error) {
-        throw error;
-      } else {
-        response.json({
-          status: "SUCCESS",
-          message: "MOVIE DELETED SUCCESSFULLY",
-          data: result
-        });
+    await MovieModel.findByIdAndDelete(
+      request.params.movieId,
+      (error, result) => {
+        if (error) {
+          throw error;
+        } else {
+          response.json({
+            status: "SUCCESS",
+            message: "MOVIE DELETED SUCCESSFULLY",
+            data: result
+          });
+        }
       }
-    });
+    );
   }
 }

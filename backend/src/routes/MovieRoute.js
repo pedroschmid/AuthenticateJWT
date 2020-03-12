@@ -1,20 +1,13 @@
 import express from "express";
-
 import MovieController from "../controllers/MovieController.js";
 
-export default class MovieRoute {
-  movieController = new MovieController();
+let router = express.Router();
+let movieController = new MovieController();
 
-  constructor() {
-    this.router = express.Router();
-    this.routes();
-  }
+router.get("/", movieController.getAll);
+router.get("/:movieId", movieController.getByName);
+router.post("/", movieController.create);
+router.put("/:movieId", movieController.updateByName);
+router.delete("/:movieId", movieController.deleteByName);
 
-  routes() {
-    this.router.get("/", this.movieController.getAll);
-    this.router.get("/:movieName", this.movieController.getByName);
-    this.router.post("/", this.movieController.create);
-    this.router.put("/:movieName", this.movieController.updateByName);
-    this.router.delete("/:movieName", this.movieController.deleteByName);
-  }
-}
+export default router;

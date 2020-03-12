@@ -1,20 +1,13 @@
 import express from "express";
-
 import UserController from "../controllers/UserController.js";
 
-export default class UserRoute {
-  userController = new UserController();
+let router = express.Router();
+let userController = new UserController();
 
-  constructor() {
-    this.router = express.Router();
-    this.routes();
-  }
+router.get("/", userController.getAll);
+router.post("/", userController.create);
+router.post("/authenticate", userController.authenticate);
+router.put("/:userId", userController.updateByName);
+router.delete("/:userId", userController.deleteByName);
 
-  routes() {
-    this.router.get("/", this.userController.getAll);
-    this.router.post("/", this.userController.create);
-    this.router.post("/authenticate", this.userController.authenticate);
-    this.router.put("/:userName", this.userController.updateByName);
-    this.router.delete("/:userName", this.userController.deleteByName);
-  }
-}
+export default router;

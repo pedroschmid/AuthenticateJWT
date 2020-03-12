@@ -9,8 +9,6 @@ import UserRoute from "./routes/UserRoute.js";
 import MovieRoute from "./routes/MovieRoute.js";
 
 class App {
-  userRoute = new UserRoute();
-  movieRoute = new MovieRoute();
 
   constructor() {
     this.app = express();
@@ -41,10 +39,11 @@ class App {
   }
 
   routes() {
-    this.app.use("/users", this.userRoute.routes);
-    this.app.use("/movies", this.validateUser, this.movieRoute.routes);
+    this.app.use("/users", UserRoute);
+    this.app.use("/movies", this.validateUser, MovieRoute);
   }
 
+  // Function to validate user
   validateUser(req, res, next) {
     jwt.verify(
       req.headers["x-access-token"],
@@ -54,7 +53,7 @@ class App {
           res.json({ status: "error", message: err.message, data: null });
         } else {
           // add user id to request
-          req.body.userName = decoded.name;
+          req.body.userName = decoded.id;
           next();
         }
       }
